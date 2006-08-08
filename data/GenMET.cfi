@@ -1,0 +1,21 @@
+# File: GenMET.cff
+# Author: R. Cavanaugh
+# Date: 08.08.2006
+#
+# Form Missing ET from Generator Information and store into event as a GenMET
+# product.  Exclude calo invisible final state particles like neutrinos, muons, LSPs, etc
+
+  include "SimGeneral/HepPDTESSource/data/pdt.cfi"
+
+  module genCandidatesForMET = HepMCCandidateProducer {
+      string src = "source"
+      untracked bool verbose = true
+      bool stableOnly = true
+      vstring excludeList = { }
+  }
+
+  module genMet = METProducer 
+  {
+      string src = "genCandidatesForMET"
+      string METType = "GenMET"
+  }

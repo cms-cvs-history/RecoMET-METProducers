@@ -1,0 +1,13 @@
+# File: CaloMET.cff
+# Author: R. Cavanaugh
+# Date: 08.08.2006
+#
+# Form uncorrected Missing ET from Calorimeter Towers and store into event as a CaloMET
+# product
+
+
+module met = METProducer 
+{
+    string src = "caloTowers"
+    string METType = "CaloMET"
+}
