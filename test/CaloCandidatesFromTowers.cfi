@@ -1,0 +1,9 @@
+
+module caloTowers = CaloTowerCandidateCreator 
+{
+   InputTag src = towerMaker
+   double minimumEt = -1
+   double minimumE = -1
+}
+ 
+sequence caloCandidatesForMET = { caloTowers }

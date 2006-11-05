@@ -10,7 +10,7 @@
 
   module genCandidatesForMET = HepMCCandidateProducer {
       string src = "source"
-      untracked bool verbose = true
+      untracked bool verbose = false
       bool stableOnly = true
       vstring excludeList = { "nu(e)0", "nu(mu)0", "nu(tau)0", "mu-" }
   }

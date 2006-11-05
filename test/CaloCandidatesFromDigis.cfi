@@ -1,0 +1,27 @@
+# DEFAULT RECONSTRUCTION OF ECAL AND HCAL: PRODUCES RECHITS
+include "Configuration/JetMET/data/calorimetry-reconstruction.cff"
+
+# DEFAULT CALOTOWERS: PRODUCES TOWERS (REQUIRES GEOMETRY)
+# include "Configuration/JetMET/data/calorimetry-caltowers.cff"
+
+# CUSTOM CALOTOWERS: PRODUCES TOWERS (REQUIRES GEOMETRY)
+include "Geometry/CMSCommonData/data/cmsIdealGeometryXML.cfi"
+include "Geometry/CaloEventSetup/data/CaloGeometry.cfi"
+include "Geometry/CaloEventSetup/data/CaloTopology.cfi"
+include "RecoMET/METProducers/test/CaloTowerSchemeB.cfi"
+
+es_module = CaloTowerConstituentsMapBuilder 
+{
+   untracked string MapFile="Geometry/CaloTopology/data/CaloTowerEEGeometric.map.gz"
+}
+
+es_module = HcalTopologyIdealEP {}
+
+module caloTowers = CaloTowerCandidateCreator 
+{
+   InputTag src = towerMaker
+   double minimumEt = -1
+   double minimumE = -1
+}
+ 
+sequence caloCandidatesForMET = { caloReco, towerMaker, caloTowers }
