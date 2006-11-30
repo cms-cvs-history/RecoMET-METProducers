@@ -19,4 +19,5 @@
   {
       string src = "genCandidatesForMET"
       string METType = "GenMET"
+      string alias = "RawGenMET"
   }

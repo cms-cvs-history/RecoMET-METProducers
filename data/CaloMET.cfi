@@ -10,4 +10,5 @@ module met = METProducer
 {
     string src = "caloTowers"
     string METType = "CaloMET"
+    string alias = "RawCaloMET"
 }
