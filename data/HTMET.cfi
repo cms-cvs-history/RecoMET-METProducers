@@ -1,0 +1,16 @@
+# File: HTMET.cff
+# Author: R. Cavanaugh
+# Date: 08.08.2006
+#
+# Form uncorrected Missing ET from Calorimeter Towers and store into event as a CaloMET
+# product
+
+
+module htMet = METProducer 
+{
+    string src       = "midPointCone5CaloJets"  # Input  product label		  
+    string InputType = "CaloJetCollection"	# Input  product type		  
+    string METType   = "MET" 		        # Output MET type		  
+    string alias     = "HTMET"			# Alias  for FWLite		  
+    double globalThreshold = 5.0		# Global Threshold for input objects
+}
