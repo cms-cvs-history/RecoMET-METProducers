@@ -2,7 +2,7 @@
 # Author: R. Cavanaugh
 # Date: 08.08.2006
 #
-# Form uncorrected Missing ET from Calorimeter Towers and store into event as a CaloMET
+# Form uncorrected Missing HT from Jets and store into event as a MET
 # product
 
 
