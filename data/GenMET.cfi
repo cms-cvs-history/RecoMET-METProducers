@@ -17,7 +17,9 @@
 
   module genMet = METProducer 
   {
-      string src = "genCandidatesForMET"
-      string METType = "GenMET"
-      string alias = "RawGenMET"
+      string src =       "genCandidatesForMET" # Input  product label		  
+      string InputType = "CandidateCollection" # Input  product type		  
+      string METType =   "GenMET"              # Output MET type		  
+      string alias =     "GenMET"	       # Alias  for FWLite		  
+      double globalThreshold = 0.0	       # Global Threshold for input objects
   }
