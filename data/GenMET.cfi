@@ -6,12 +6,18 @@
 # product.  Exclude calo invisible final state particles like neutrinos, muons
 # To be resolved:  How to exclude exotics, like the LSP?
 
+  include "PhysicsTools/HepMCCandAlgos/data/genParticleCandidatesFast.cfi"
   include "SimGeneral/HepPDTESSource/data/pythiapdt.cfi"
 
-  module genCandidatesForMET = HepMCCandidateProducer {
+  module genCandidatesForMET = GenParticleCandidateProducer
+  {
       string src = "VtxSmeared"
-      untracked bool verbose = false
       bool stableOnly = true
+      double ptMinNeutral = -1 # 0.1
+      double ptMinCharged = -1 # 0.5
+      double ptMinGluon = -1 #0.5
+      bool keepInitialProtons = true
+      bool excludeUnfragmentedClones = false
       vstring excludeList = { "nu_e", "nu_mu", "nu_tau", "mu-" }
   }
 
