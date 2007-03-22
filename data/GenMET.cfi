@@ -5,14 +5,26 @@
 # Form Missing ET from Generator Information and store into event as a GenMET
 # product.  Exclude calo invisible final state particles like neutrinos, muons
 # To be resolved:  How to exclude exotics, like the LSP?
+#
+# F.R. Mar. 22, 2007 IMPORTANT: this configuration assumes that some
+#                    GenParticle collections are made via GenJet's configuration
 
-  include "SimGeneral/HepPDTESSource/data/pdt.cfi"
+  include "PhysicsTools/HepMCCandAlgos/data/genParticleCandidatesFast.cfi"
+  include "SimGeneral/HepPDTESSource/data/pythiapdt.cfi"
 
-  module genCandidatesForMET = HepMCCandidateProducer {
-      string src = "VtxSmeared"
-      untracked bool verbose = false
+  module genCandidatesForMET = GenParticleCandidateSelector
+  {
+      string src = "genParticleCandidates"
       bool stableOnly = true
-      vstring excludeList = { "nu(e)0", "nu(mu)0", "nu(tau)0", "mu-" }
+      untracked bool verbose = true
+      vstring excludeList = {"nu_e", "nu_mu", "nu_tau", "mu-",
+                          "~chi_10", 
+                          "~nu_eR", "~nu_muR", "~nu_tauR", 
+			  "Graviton", "~Gravitino", 
+                          "nu_Re", "nu_Rmu", "nu_Rtau", 
+                          "nu*_e0", "Graviton*"
+                         }
+      vstring includeList = {}
   }
 
   module genMet = METProducer 
@@ -21,5 +33,14 @@
       string InputType = "CandidateCollection" # Input  product type		  
       string METType =   "GenMET"              # Output MET type		  
       string alias =     "GenMET"	       # Alias  for FWLite		  
+      double globalThreshold = 0.0	       # Global Threshold for input objects
+  }
+
+  module genMetNoNu = METProducer 
+  {
+      string src =       "genParticlesAllStableNoNu" # Input  product label		  
+      string InputType = "CandidateCollection" # Input  product type		  
+      string METType =   "GenMET"              # Output MET type		  
+      string alias =     "GenMETNoNu"	       # Alias  for FWLite		  
       double globalThreshold = 0.0	       # Global Threshold for input objects
   }
