@@ -1,0 +1,16 @@
+# File: GenMET.cff
+# Author: R. Cavanaugh
+# Date: 08.08.2006
+#
+# Form Missing ET from Generator Information and store into event as a GenMET
+# product.  Exclude calo invisible final state particles like neutrinos, muons
+
+  module genMet = METProducer 
+  {
+      string src =       "genCandidatesForMET" # Input  product label		  
+      string InputType = "CandidateCollection" # Input  product type		  
+      string METType =   "GenMET"              # Output MET type		  
+      string alias =     "GenMET"	       # Alias  for FWLite		  
+      double globalThreshold = 0.0	       # Global Threshold for input objects
+  }
+
