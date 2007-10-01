@@ -14,3 +14,23 @@ module htMet = METProducer
     string alias     = "HTMET"			# Alias  for FWLite		  
     double globalThreshold = 5.0		# Global Threshold for input objects
 }
+
+
+module htMetIC5 = METProducer 
+{
+    string src       = "iterativeCone5CaloJets"  # Input  product label		  
+    string InputType = "CaloJetCollection"	# Input  product type		  
+    string METType   = "MET" 		        # Output MET type		  
+    string alias     = "HTMET"			# Alias  for FWLite		  
+    double globalThreshold = 5.0		# Global Threshold for input objects
+}
+
+
+module htMetMC5 = METProducer 
+{
+    string src       = "midPointCone5CaloJets"  # Input  product label		  
+    string InputType = "CaloJetCollection"	# Input  product type		  
+    string METType   = "MET" 		        # Output MET type		  
+    string alias     = "HTMET"			# Alias  for FWLite		  
+    double globalThreshold = 5.0		# Global Threshold for input objects
+}
