@@ -12,5 +12,6 @@
       string METType =   "GenMET"              # Output MET type		  
       string alias =     "GenMET"	       # Alias  for FWLite		  
       double globalThreshold = 0.0	       # Global Threshold for input objects
+      bool noHF = false	                      # do not exclude HF	
   }
 
