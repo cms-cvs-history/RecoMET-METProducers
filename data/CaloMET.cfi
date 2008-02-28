@@ -8,7 +8,7 @@
 
 module met = METProducer 
 {
-    string src       = "caloTowers"           # Input  product label		  
+    InputTag src       = caloTowers           # Input  product label		  
     string InputType = "CandidateCollection"  # Input  product type		  
     string METType   = "CaloMET"              # Output MET type		  
     string alias     = "RawCaloMET"           # Alias  for FWLite		  

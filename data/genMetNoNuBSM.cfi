@@ -7,7 +7,7 @@
 
   module genMetNoNuBSM = METProducer 
   {
-      string src =       "genParticlesAllStableNoNuBSM" # Input  product label		  
+      InputTag src =     genParticlesAllStableNoNuBSM # Input  product label		  
       string InputType = "CandidateCollection" # Input  product type		  
       string METType =   "GenMET"              # Output MET type		  
       string alias =     "GenMETNoNuBSM"       # Alias  for FWLite		  

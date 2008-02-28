@@ -8,7 +8,7 @@
 
 module htMet = METProducer 
 {
-    string src       = "midPointCone5CaloJets"  # Input  product label		  
+    InputTag src     = midPointCone5CaloJets    # Input  product label		  
     string InputType = "CaloJetCollection"	# Input  product type		  
     string METType   = "MET" 		        # Output MET type		  
     string alias     = "HTMET"			# Alias  for FWLite		  
@@ -18,7 +18,7 @@ module htMet = METProducer
 
 module htMetIC5 = METProducer 
 {
-    string src       = "iterativeCone5CaloJets"  # Input  product label		  
+    InputTag src     =  iterativeCone5CaloJets  # Input  product label		  
     string InputType = "CaloJetCollection"	# Input  product type		  
     string METType   = "MET" 		        # Output MET type		  
     string alias     = "HTMET"			# Alias  for FWLite		  
@@ -28,7 +28,7 @@ module htMetIC5 = METProducer
 
 module htMetMC5 = METProducer 
 {
-    string src       = "midPointCone5CaloJets"  # Input  product label		  
+    InputTag src     = midPointCone5CaloJets    # Input  product label		  
     string InputType = "CaloJetCollection"	# Input  product type		  
     string METType   = "MET" 		        # Output MET type		  
     string alias     = "HTMET"			# Alias  for FWLite		  
