@@ -15,3 +15,13 @@ module met = METProducer
     double globalThreshold = 0.0              # Global Threshold for input objects
     bool noHF = false	                      # do not exclude HF
 }
+
+module metOpt = METProducer
+{
+    InputTag src       = caloTowersOpt           # Input  product label
+    string InputType = "CandidateCollection"  # Input  product type
+    string METType   = "CaloMET"              # Output MET type
+    string alias     = "RawCaloMET"           # Alias  for FWLite
+    double globalThreshold = 0.0              # Global Threshold for input objects
+    bool noHF = false                         # do not exclude HF
+}
