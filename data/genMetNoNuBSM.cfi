@@ -14,3 +14,4 @@
       double globalThreshold = 0.0	       # Global Threshold for input objects
       bool noHF = false	                      # do not exclude HF
   }
+
