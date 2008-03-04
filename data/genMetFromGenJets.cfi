@@ -9,7 +9,7 @@
   {
       InputTag src =     iterativeCone5GenJetsPt10    # Input  product label		  
       string InputType = "CandidateCollection"        # Input  product type		  
-      string METType =   "GenMET"                     # Output MET type		  
+      string METType =   "MET"                        # Output MET type		  
       string alias =     "GenMETIC5NoNuBSM"           # Alias  for FWLite		  
       double globalThreshold = 0.0	              # Global Threshold for input objects
       bool noHF = false	                              # do not exclude HF
@@ -19,7 +19,7 @@
   {
       InputTag src =     iterativeCone5GenJetsNoNuBSM # Input  product label		  
       string InputType = "CandidateCollection"        # Input  product type		  
-      string METType =   "GenMET"                     # Output MET type		  
+      string METType =   "MET"                        # Output MET type		  
       string alias =     "GenMETIC5NoNuBSM"           # Alias  for FWLite		  
       double globalThreshold = 0.0	              # Global Threshold for input objects
       bool noHF = false	                              # do not exclude HF
