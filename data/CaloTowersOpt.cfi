@@ -1,19 +1,25 @@
-
+# File: CaloTowerOpt.cfi
+# Author: B. Scurlock
+# Date: 03.06.2008
+#
+# Form uncorrected Missing ET from Calorimeter Towers and store into event as a CaloMET
+# product
+# Creates new calotowers with optimized Energy thresholds for MET. 
 
 module calotoweroptmaker = CaloTowersCreator {
 
    /// Energy threshold for HB cell inclusion [GeV]
-   double HBThreshold = 0.4     // GeV, Scheme B
+   double HBThreshold = 0.5     // GeV, Scheme MET optimiazed
    /// Energy threshold for HO cell inclusion [GeV]
-   double HOThreshold = 0.5     // GeV, Scheme B
+   double HOThreshold = 0.5     // GeV, Scheme MET optimized
    /// Energy threshold for 5-degree (phi) HE cell inclusion [GeV]
-   double HESThreshold = 0.3    // GeV, Scheme B
+   double HESThreshold = 0.7    // GeV, Scheme MET optimized
    /// Energy threshold for 10-degree (phi) HE cel inclusion [GeV]
-   double HEDThreshold = 0.4    // GeV, Scheme B
+   double HEDThreshold = 0.5    // GeV, Scheme MET optimized
    /// Energy threshold for long-fiber HF readout inclusion [GeV]
-   double HF1Threshold = 0.7    // GeV, Updated June 2007
+   double HF1Threshold = 1.2    // GeV
    /// Energy threshold for short-fiber HF readout inclusion [GeV]
-   double HF2Threshold = 1.0    // GeV, Updated June 2007
+   double HF2Threshold = 1.8    // GeV
    
    /// Energy threshold for EB crystal inclusion [GeV]
    double EBThreshold = 0.09    // GeV, ORCA value w/o selective readout
