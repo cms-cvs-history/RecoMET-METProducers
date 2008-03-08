@@ -5,22 +5,12 @@
 # Form Missing ET from Generator Information and store into event as a GenMET
 # product.  
 
-  module genMetIC5GenJetsPt10 = METProducer 
+  module genMetIC5GenJets = METProducer 
   {
-      InputTag src =     iterativeCone5GenJetsPt10    # Input  product label		  
+      InputTag src =     iterativeCone5GenJets        # Input  product label		  
       string InputType = "CandidateCollection"        # Input  product type		  
       string METType =   "MET"                        # Output MET type		  
-      string alias =     "GenMETIC5NoNuBSM"           # Alias  for FWLite		  
-      double globalThreshold = 0.0	              # Global Threshold for input objects
-      bool noHF = false	                              # do not exclude HF
-  }
-
-  module genMetIC5GenJetsNoNuBSM = METProducer 
-  {
-      InputTag src =     iterativeCone5GenJetsNoNuBSM # Input  product label		  
-      string InputType = "CandidateCollection"        # Input  product type		  
-      string METType =   "MET"                        # Output MET type		  
-      string alias =     "GenMETIC5NoNuBSM"           # Alias  for FWLite		  
+      string alias =     "GenMETIC5"                  # Alias  for FWLite		  
       double globalThreshold = 0.0	              # Global Threshold for input objects
       bool noHF = false	                              # do not exclude HF
   }
