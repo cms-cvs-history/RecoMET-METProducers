@@ -8,7 +8,7 @@
 
 module met = METProducer 
 {
-    InputTag src       = caloTowers           # Input  product label		  
+    InputTag src       = towerMaker           # Input  product label		  
     string InputType = "CandidateCollection"  # Input  product type		  
     string METType   = "CaloMET"              # Output MET type		  
     string alias     = "RawCaloMET"           # Alias  for FWLite		  
@@ -18,7 +18,7 @@ module met = METProducer
 
 module metOpt = METProducer
 {
-    InputTag src       = caloTowersOpt           # Input  product label
+    InputTag src       = calotoweroptmaker           # Input  product label
     string InputType = "CandidateCollection"  # Input  product type
     string METType   = "CaloMET"              # Output MET type
     string alias     = "RawCaloMETOpt"           # Alias  for FWLite
@@ -28,7 +28,7 @@ module metOpt = METProducer
 
 module metNoHF = METProducer 
 {
-    InputTag src       = caloTowers           # Input  product label		  
+    InputTag src       = towerMaker           # Input  product label		  
     string InputType = "CandidateCollection"  # Input  product type		  
     string METType   = "CaloMET"              # Output MET type		  
     string alias     = "RawCaloMETNoHF"           # Alias  for FWLite		  
@@ -38,7 +38,7 @@ module metNoHF = METProducer
 
 module metOptNoHF = METProducer
 {
-    InputTag src       = caloTowersOpt           # Input  product label
+    InputTag src       = calotoweroptmaker          # Input  product label
     string InputType = "CandidateCollection"  # Input  product type
     string METType   = "CaloMET"              # Output MET type
     string alias     = "RawCaloMETOptNoHF"           # Alias  for FWLite

@@ -26,7 +26,7 @@ module calotoweroptmaker = CaloTowersCreator {
    /// Energy threshold for EE crystal inclusion [GeV]
    double EEThreshold = 0.45    // GeV, ORCA value w/o selective readout
    
-   /// Energy threshold for EB 5x5 crystal inclusion [GeV]
+    /// Energy threshold for EB 5x5 crystal inclusion [GeV]
    double EBSumThreshold = 0.2  // GeV, Scheme B
    /// Energy threshold for EE crystals-in-tower inclusion [GeV]
    double EESumThreshold = 0.45 // GeV, Scheme B
