@@ -7,11 +7,12 @@
 
   module genMetNoNuBSM = METProducer 
   {
-      InputTag src =     genParticlesForJets # Input  product label		  
+      InputTag src =     genCandidatesForMETNoNuBSM  # Input  product label		  
       string InputType = "CandidateCollection" # Input  product type		  
       string METType =   "GenMET"              # Output MET type		  
       string alias =     "GenMETNoNuBSM"       # Alias  for FWLite		  
       double globalThreshold = 0.0	       # Global Threshold for input objects
       bool noHF = false	                      # do not exclude HF
   }
+
 
