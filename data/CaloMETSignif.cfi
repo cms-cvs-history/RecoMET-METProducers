@@ -1,0 +1,38 @@
+# File: CaloMETSignif.cff
+# Author: F.Blekman
+# Date: 07.30.2008
+#
+# Run the missing ET significance algorithm.
+
+
+module met = METProducer 
+{
+    InputTag src       = towerMaker           # Input  product label		  
+    string InputType = "CandidateCollection"  # Input  product type		  
+    string METType   = "CaloMET"              # Output MET type		  
+    string alias     = "RawCaloMET"           # Alias  for FWLite		  
+    double globalThreshold = 0.5              # Global Threshold for input objects
+    bool noHF = false	                      # do not exclude HF
+
+ 
+
+    #missing ET significance resolution parameters: 
+    # ET resolution has three parameters, defined as parameters in 'standard' resolution function res= et*sqrt((par[2]*par[2])+(par[1]*par[1]/et)+(par[0]*par[0]/(et*et)));
+    # PHI resolution has one parameter,defined as res = par[0]*et;
+
+    #ECAL:
+    vdouble EB_EtResPar = {0.2,0.03,0.005}
+    vdouble EB_PhiResPar = {0.0174}
+    vdouble EE_EtResPar = {0.2,0.03,0.005}
+    vdouble EE_PhiResPar = {0.087}
+    #HCAL:
+    vdouble HB_EtResPar = {0.,1.22,0.05}
+    vdouble HB_PhiResPar = {0.087}
+    vdouble HE_EtResPar = {0.,1.3,0.05}
+    vdouble HE_PhiResPar = {0.087}
+    vdouble HO_EtResPar = {0.,1.3,0.005}
+    vdouble HO_PhiResPar = {0.087}
+    vdouble HF_EtResPar = {0.,1.82,0.09}
+    vdouble HF_PhiResPar = {0.174}
+}
+
