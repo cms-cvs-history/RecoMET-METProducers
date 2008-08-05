@@ -22,17 +22,17 @@ module metsig = METProducer
 
     #ECAL:
     vdouble EB_EtResPar = {0.2,0.03,0.005}
-    vdouble EB_PhiResPar = {0.0174}
+    vdouble EB_PhiResPar = {0.00502}  # 0.0174/sqrt(12)
     vdouble EE_EtResPar = {0.2,0.03,0.005}
-    vdouble EE_PhiResPar = {0.087}
+    vdouble EE_PhiResPar = {0.02511} # 0.087/sqrt(12)
     #HCAL:
     vdouble HB_EtResPar = {0.,1.22,0.05}
-    vdouble HB_PhiResPar = {0.087}
+    vdouble HB_PhiResPar = {0.02511} # 0.087/sqrt(12)
     vdouble HE_EtResPar = {0.,1.3,0.05}
-    vdouble HE_PhiResPar = {0.087}
+    vdouble HE_PhiResPar = {0.02511} # 0.087/sqrt(12)
     vdouble HO_EtResPar = {0.,1.3,0.005}
-    vdouble HO_PhiResPar = {0.087}
+    vdouble HO_PhiResPar = {0.02511} # 0.087/sqrt(12)
     vdouble HF_EtResPar = {0.,1.82,0.09}
-    vdouble HF_PhiResPar = {0.174}
+    vdouble HF_PhiResPar =  {0.05022} # 0.174/sqrt(12)
 }
 
