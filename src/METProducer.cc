@@ -14,6 +14,7 @@
 #include "RecoMET/METAlgorithms/interface/CaloSpecificAlgo.h"
 #include "RecoMET/METAlgorithms/interface/PFSpecificAlgo.h"
 #include "RecoMET/METAlgorithms/interface/GenSpecificAlgo.h"
+#include "RecoMET/METAlgorithms/interface/TCMETAlgo.h"
 //#include "DataFormats/METObjects/interface/METCollection.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
@@ -64,6 +65,12 @@ namespace cms
       produces<GenMETCollection>().setBranchAlias(alias.c_str());
     else if (METtype == "CaloMETSignif")
       produces<CaloMETCollection>().setBranchAlias(alias.c_str());
+    else if (METtype == "TCMET" )
+      {
+        produces<METCollection>().setBranchAlias(alias.c_str());
+        TCMETAlgo ALGO;
+        responseFunction_ = ALGO.getResponseFunction();
+      }
     else                            
       produces<METCollection>().setBranchAlias(alias.c_str()); 
   }
@@ -89,76 +96,116 @@ namespace cms
   //-----------------------------------
   void METProducer::produce(Event& event, const EventSetup& setup) 
   {
-
-    //-----------------------------------
-    // Step A: Get Inputs.  Create an empty collection of candidates
+    //-----------------------------------                                                                                             
+    // Step A: Get Inputs.  Create an empty collection of candidates                                                                  
     edm::Handle<edm::View<Candidate> > input;
     event.getByLabel(inputLabel,input);
-    //-----------------------------------
-    // Step B: Create an empty MET struct output.
+    //-----------------------------------                                                                                             
+    // Step B: Create an empty MET struct output.                                                                                     
     CommonMETData output;
-    /*
-    //-----------------------------------
-    // Step C: Convert input source to type CandidateCollection
-    const RefToBaseVector<Candidate> inputCol = inputHandle->refVector();
-    const CandidateCollection *input = (const CandidateCollection *)inputCol.product();
+    /*                                                                                                                                
+    //-----------------------------------                                                                                             
+    // Step C: Convert input source to type CandidateCollection                                                                       
+    const RefToBaseVector<Candidate> inputCol = inputHandle->refVector();                                                             
+    const CandidateCollection *input = (const CandidateCollection *)inputCol.product();                                               
     */
-    //-----------------------------------
-    // Step C2: Invoke the MET algorithm, which runs on any CandidateCollection input. 
-    alg_.run(input, &output, globalThreshold);
-    //-----------------------------------
-    // Step D: Invoke the specific "afterburner", which adds information
-    //         depending on the input type, given via the config parameter.
-    //         Also, after the specific algorithm has been called, store
-    //         the output into the Event.
-    if( METtype == "CaloMET" ) 
-    {
-      CaloSpecificAlgo calo;
-      std::auto_ptr<CaloMETCollection> calometcoll; 
-      calometcoll.reset(new CaloMETCollection);
-      calometcoll->push_back( calo.addInfo(input, output, noHF, globalThreshold) );
-      event.put( calometcoll );
-    }
-    //-----------------------------------
+    //-----------------------------------                                                                                             
+    // Step C2: Invoke the MET algorithm, which runs on any CandidateCollection input.                                                
+
+    //    alg_.run(input, &output, globalThreshold);   // No need to run this for all METTypes!                                       
+
+    //-----------------------------------                                                                                             
+    // Step D: Invoke the specific "afterburner", which adds information                                                              
+    //         depending on the input type, given via the config parameter.                                                           
+    //         Also, after the specific algorithm has been called, store                                                              
+    //         the output into the Event.  
+
+
+
+    if( METtype == "CaloMET" )
+      {
+	/*                                                                                                                              
+        //Old implementation (prior to 30X and 11/14/2008)                                                                            
+      alg_.run(input, &output, globalThreshold);                                                                                      
+      CaloSpecificAlgo calo;                                                                                                          
+      std::auto_ptr<CaloMETCollection> calometcoll;                                                                                   
+      calometcoll.reset(new CaloMETCollection);                                                                                       
+      calometcoll->push_back( calo.addInfo(input, output, noHF, globalThreshold) );                                                   
+      event.put( calometcoll );                                                                                                       
+	*/
+
+	//Run Basic MET Algorithm                                                                                                       
+	alg_.run(input, &output, globalThreshold);
+
+	// Run CaloSpecific Algorithm                                                                                                   
+	CaloSpecificAlgo calospecalgo;
+	CaloMET calomet = calospecalgo.addInfo(input,output,noHF, globalThreshold);
+
+	//Run algorithm to calculate CaloMET Significance and add to the CaloMET Object                                                 
+	SignCaloSpecificAlgo signcalospecalgo;
+	metsig::SignAlgoResolutions resolutions(conf_);
+	calomet.SetMetSignificance( signcalospecalgo.addSignificance(input,output,resolutions,noHF,globalThreshold) );
+
+	//Store CaloMET object in CaloMET collection                                                                                    
+	std::auto_ptr<CaloMETCollection> calometcoll;
+	calometcoll.reset(new CaloMETCollection);
+	calometcoll->push_back( calomet ) ;
+	event.put( calometcoll );
+      }
+    //-----------------------------------                                                                                             
+    else if( METtype == "TCMET" )
+      {
+        TCMETAlgo tcmetalgorithm;
+	std::auto_ptr<METCollection> tcmetcoll;
+        tcmetcoll.reset(new METCollection);
+        tcmetcoll->push_back( tcmetalgorithm.CalculateTCMET(event, setup, conf_, responseFunction_) ) ;
+        event.put( tcmetcoll );
+      }
+    //----------------------------------                                                                                              
     else if( METtype == "PFMET" )
-    {
-      PFSpecificAlgo pf;
-      std::auto_ptr<PFMETCollection> pfmetcoll;
-      pfmetcoll.reset (new PFMETCollection);
-      pfmetcoll->push_back( pf.addInfo(input, output) );
-      event.put( pfmetcoll );
-    }
-    //-----------------------------------
-    else if( METtype == "GenMET" ) 
-    {
-      GenSpecificAlgo gen;
-      std::auto_ptr<GenMETCollection> genmetcoll;
-      genmetcoll.reset (new GenMETCollection);
-      genmetcoll->push_back( gen.addInfo(input, output) );
-      event.put( genmetcoll );
-    }
-    //-----------------------------------
-    else if( METtype == "CaloMETSignif" ) 
-    {
-      SignCaloSpecificAlgo calo;
-      // first calculate all standard info. Then over-write the values used by the significance:
-      std::auto_ptr<CaloMETCollection> calometcoll; 
-      calometcoll.reset(new CaloMETCollection);
-      metsig::SignAlgoResolutions resolutions(conf_);
-      calometcoll->push_back( calo.addInfo(input, output, resolutions, noHF, globalThreshold) );
-      event.put( calometcoll );
-    }
-    //-----------------------------------
+      {
+        PFSpecificAlgo pf;
+	std::auto_ptr<PFMETCollection> pfmetcoll;
+        pfmetcoll.reset (new PFMETCollection);
+        pfmetcoll->push_back( pf.addInfo(input, output) );
+        event.put( pfmetcoll );
+      }
+    //-----------------------------------  
+    else if( METtype == "GenMET" )
+      {
+	alg_.run(input, &output, globalThreshold);
+	GenSpecificAlgo gen;
+	std::auto_ptr<GenMETCollection> genmetcoll;
+	genmetcoll.reset (new GenMETCollection);
+	genmetcoll->push_back( gen.addInfo(input, output) );
+	event.put( genmetcoll );
+      }
+    //-----------------------------------                                                                                             
+    else if( METtype == "CaloMETSignif" )
+      {
+	alg_.run(input, &output, globalThreshold);
+	SignCaloSpecificAlgo calo;
+	// first calculate all standard info. Then over-write the values used by the significance:                                      
+	std::auto_ptr<CaloMETCollection> calometcoll;
+	calometcoll.reset(new CaloMETCollection);
+	metsig::SignAlgoResolutions resolutions(conf_);
+	calometcoll->push_back( calo.addInfo(input, output, resolutions, noHF, globalThreshold) );
+	event.put( calometcoll );
+      }
+    //-----------------------------------                                                                                             
     else
-    {
-      LorentzVector p4( output.mex, output.mey, 0.0, output.met);
-      Point vtx(0,0,0);
-      MET met( output.sumet, p4, vtx );
-      std::auto_ptr<METCollection> metcoll;
-      metcoll.reset(new METCollection);
-      metcoll->push_back( met );
-      event.put( metcoll );
-    }
+      {
+	alg_.run(input, &output, globalThreshold);
+	LorentzVector p4( output.mex, output.mey, 0.0, output.met);
+	Point vtx(0,0,0);
+	MET met( output.sumet, p4, vtx );
+	std::auto_ptr<METCollection> metcoll;
+	metcoll.reset(new METCollection);
+	metcoll->push_back( met );
+	event.put( metcoll );
+      }
+    //-----------------------------------       
+
     //-----------------------------------
   }
   //--------------------------------------------------------------------------
