@@ -7,21 +7,12 @@ hcalnoise = cms.EDProducer(
     fillCaloTowers = cms.bool(True),
     fillJets = cms.bool(True),
     fillTracks = cms.bool(False),    
-    dropRefVectors = cms.bool(True),
+    dropRefVectors = cms.bool(False),
     refillRefVectors = cms.bool(False),
 
     # conditions for writing RBX to the event
-    RBXEnergyThreshold = cms.double(15.),
-    minHPDEnergy    = cms.double(100.),
-    minRBXEnergy    = cms.double(200.),
+    RBXEnergyThreshold = cms.double(10.),
     minRecHitEnergy = cms.double(1.5),
-    minHPDNumRecHit = cms.int32(10),
-    minRBXNumZeros  = cms.int32(5),
-    minRBXMaxZeros  = cms.int32(4),
-    minRBXTime      = cms.double(-50.),
-    maxRBXTime      = cms.double(100.),
-    minHPDRatio     = cms.double(0.7),
-    maxHPDRatio     = cms.double(0.95),
     maxProblemRBXs  = cms.int32(8),
 
     # parameters for calculating summary variables
