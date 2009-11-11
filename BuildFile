@@ -1,3 +1,4 @@
+
 <flags EDM_PLUGIN=1>
 <use name=RecoMET/METAlgorithms>
 <use name=DataFormats/METReco>
@@ -5,6 +6,7 @@
 <use name=DataFormats/Common>
 <use name=DataFormats/JetReco>
 <use name=DataFormats/TrackReco>
+<use name=DataFormats/CSCRecHit>
 <use name=CalibFormats/HcalObjects>
 <export>
  <lib name=RecoMETMETProducers>
@@ -14,5 +16,6 @@
  <use name=DataFormats/Common>
  <use name=DataFormats/JetReco>
  <use name=DataFormats/TrackReco>
+ <use name=DataFormats/CSCRecHit>
  <use name=CalibFormats/HcalObjects>
 </export>
