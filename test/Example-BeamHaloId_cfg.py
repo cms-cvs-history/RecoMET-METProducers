@@ -35,7 +35,7 @@ process.source = cms.Source("PoolSource",
     )
     )
 
-process.p = cms.Path(process.BeamHaloId*process.halosummary)
+process.p = cms.Path(process.BeamHaloId*process.BeamHaloSummary)
 #process.p = cms.Path(process.CSCHaloData*process.EcalHaloData*process.HcalHaloData*process.GlobalHaloData)
 
 
