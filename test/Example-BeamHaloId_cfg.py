@@ -6,10 +6,6 @@ process.load("Configuration/StandardSequences/MagneticField_cff")
 process.load("Configuration/StandardSequences/FrontierConditions_GlobalTag_cff")
 process.load("Configuration/StandardSequences/RawToDigi_Data_cff")
 process.load("RecoMET/METProducers/BeamHaloSummary_cfi")
-#process.load("RecoMET/METProducers/CSCHaloData_cfi")
-#process.load("RecoMET/METProducers/EcalHaloData_cfi")
-#process.load("RecoMET/METProducers/HcalHaloData_cfi")
-#process.load("RecoMET/METProducers/GlobalHaloData_cfi")
 process.load("RecoMET/Configuration/RecoMET_BeamHaloId_cff")
 process.GlobalTag.globaltag ='STARTUP31X_V4::All'
 
@@ -39,7 +35,7 @@ process.source = cms.Source("PoolSource",
     )
     )
 
-process.p = cms.Path(process.BeamHaloId)
+process.p = cms.Path(process.BeamHaloId*process.halosummary)
 #process.p = cms.Path(process.CSCHaloData*process.EcalHaloData*process.HcalHaloData*process.GlobalHaloData)
 
 
