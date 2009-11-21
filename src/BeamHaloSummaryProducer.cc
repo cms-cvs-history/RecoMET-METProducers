@@ -176,8 +176,8 @@ void BeamHaloSummaryProducer::produce(Event& iEvent, const EventSetup& iSetup)
   // Global Halo Data
   Handle<GlobalHaloData> TheGlobalHaloData;
   iEvent.getByLabel(IT_GlobalHaloData, TheGlobalHaloData);
-  bool GlobalLooseId;
-  bool GlobalTightId;
+  bool GlobalLooseId = false;
+  bool GlobalTightId = false;
   const GlobalHaloData GlobalData = (*TheGlobalHaloData.product() );
   const std::vector<PhiWedge> MatchedHcalWedges = GlobalData.GetMatchedHcalPhiWedges();
   const std::vector<PhiWedge> MatchedEcalWedges = GlobalData.GetMatchedEcalPhiWedges();
