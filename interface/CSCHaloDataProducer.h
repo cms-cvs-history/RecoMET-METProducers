@@ -150,6 +150,13 @@ namespace reco
     edm::InputTag IT_CSCSegment;
     edm::InputTag IT_Muon;
     edm::InputTag IT_SA;
+
+    edm::InputTag IT_HLTResult;
+    std::vector< edm::InputTag > vIT_HLTBit  ;
+
+    //CSCHaloAlgo
+    CSCHaloAlgo CSCAlgo;
+
   };
 }
 
