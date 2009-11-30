@@ -56,11 +56,11 @@ void BeamHaloSummaryProducer::produce(Event& iEvent, const EventSetup& iSetup)
 
   const CSCHaloData CSCData = (*TheCSCHaloData.product() );
   //Loose Id 
-  if( CSCData.NumberOfHaloTriggers() || CSCData.NumberOfHaloTracks() ) 
+  if( CSCData.NumberOfHaloTriggers() || CSCData.NumberOfHaloTracks() || CSCData.CSCHaloHLTAccept() ) 
     TheBeamHaloSummary->GetCSCHaloReport()[0] = 1;
 
   //Tight Id 
-  if( CSCData.NumberOfHaloTriggers() && CSCData.NumberOfHaloTracks() )
+  if( (CSCData.NumberOfHaloTriggers() && CSCData.NumberOfHaloTracks()) || (CSCData.CSCHaloHLTAccept() && CSCData.NumberOfHaloTracks() ) )
     TheBeamHaloSummary->GetCSCHaloReport()[1] = 1;
   
   // Ecal Specific Halo Data
@@ -122,12 +122,10 @@ void BeamHaloSummaryProducer::produce(Event& iEvent, const EventSetup& iSetup)
     }
 
 
- if( EcalLooseId ) 
+  if( EcalLooseId ) 
     TheBeamHaloSummary->GetEcalHaloReport()[0] = 1;
   if( EcalTightId ) 
     TheBeamHaloSummary->GetEcalHaloReport()[1] = 1;
-  
-
 
   // Hcal Specific Halo Data
   Handle<HcalHaloData> TheHcalHaloData;
