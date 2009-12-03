@@ -58,8 +58,9 @@ void CSCHaloDataProducer::produce(Event& iEvent, const EventSetup& iSetup)
   iEvent.getByLabel( IT_HLTResult , TheHLTResults);
 
   // Run The CSCHaloAlgo to reconstruct the CSCHaloData object
+  /*
   if(TheCosmics.isValid() && TheCSCSegments.isValid() && TheCSCRecHits.isValid() && TheL1GMTReadout.isValid() && TheCSCGeometry.isValid() && TheHLTResults.isValid() )
-    {
+     {
       std::auto_ptr<CSCHaloData> TheCSCData(new CSCHaloData( CSCAlgo.Calculate(*TheCSCGeometry, TheCosmics, TheCSCSegments, TheCSCRecHits, TheL1GMTReadout, TheHLTResults) ) );
       // Put it in the event
       iEvent.put(TheCSCData);
@@ -70,7 +71,10 @@ void CSCHaloDataProducer::produce(Event& iEvent, const EventSetup& iSetup)
       // Put it in the event
       iEvent.put(TheCSCData);
     }
-  return;
+  */
+  std::auto_ptr<CSCHaloData> TheCSCData(new CSCHaloData( CSCAlgo.Calculate(*TheCSCGeometry, TheCosmics, TheCSCSegments, TheCSCRecHits, TheL1GMTReadout, TheHLTResults) ) );         
+  iEvent.put(TheCSCData);                                                                                                                                                           
+  return;             
 }
 
 void CSCHaloDataProducer::beginJob(){return;}
