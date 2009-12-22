@@ -28,6 +28,14 @@ CSCHaloDataProducer::CSCHaloDataProducer(const edm::ParameterSet& iConfig)
   IT_CosmicMuon = iConfig.getParameter<edm::InputTag>("CosmicMuonLabel"); 
   IT_Muon = iConfig.getParameter<edm::InputTag>("MuonLabel");
   IT_SA   = iConfig.getParameter<edm::InputTag>("SALabel"); 
+
+  //Track selection parameters
+  CSCAlgo.SetDetaThreshold( (float)iConfig.getParameter<double>("DetaParam"));
+  CSCAlgo.SetDphiThreshold((float) iConfig.getParameter<double>("DphiParam"));
+  CSCAlgo.SetNormChi2Threshold((float) iConfig.getParameter<double>("NormChi2Param"));
+  CSCAlgo.SetMinMaxInnerRadius((float)iConfig.getParameter<double>("InnerRMinParam"), (float)iConfig.getParameter<double>("InnerRMaxParam"));
+  CSCAlgo.SetMinMaxOuterRadius((float)iConfig.getParameter<double>("OuterRMinParam"), (float)iConfig.getParameter<double>("OuterRMaxParam"));
+
   produces<CSCHaloData>();
 }
 
