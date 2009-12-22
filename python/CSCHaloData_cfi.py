@@ -26,6 +26,16 @@ CSCHaloData = cms.EDProducer("CSCHaloDataProducer",
                              CosmicMuonLabel= cms.InputTag("cosmicMuons"),
                              MuonLabel = cms.InputTag("muons"),
                              SALabel  =  cms.InputTag("standAloneMuons"),
+
+                             DetaParam = cms.double(0.0),
+                             DphiParam = cms.double(999.),
+                             NormChi2Param = cms.double(999.),
+                             InnerRMinParam = cms.double(0.),
+                             OuterRMinParam = cms.double(0.),
+                             InnerRMaxParam = cms.double(9999.),
+                             OuterRMaxParam = cms.double(9999.)
+                             
                              )
+
 
 
