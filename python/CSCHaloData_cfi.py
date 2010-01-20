@@ -27,6 +27,7 @@ CSCHaloData = cms.EDProducer("CSCHaloDataProducer",
                              MuonLabel = cms.InputTag("muons"),
                              SALabel  =  cms.InputTag("standAloneMuons"),
 
+                             # Parameters optimized from MC BeamHalo.  These parameters select tracks with parallel-to-beam trajectories pointing towards HB/EB
                              DetaParam = cms.double(0.05),
                              DphiParam = cms.double(1.00),
                              NormChi2Param = cms.double(8.),
