@@ -28,29 +28,28 @@ using namespace reco;
 // constructors and destructor
 //
 
-HcalNoiseInfoProducer::HcalNoiseInfoProducer(const edm::ParameterSet& iConfig)
+HcalNoiseInfoProducer::HcalNoiseInfoProducer(const edm::ParameterSet& iConfig) : algo_(iConfig)
 {
   // set the parameters
-  fillDigis_      = iConfig.getParameter<bool>("fillDigis");
-  fillRecHits_    = iConfig.getParameter<bool>("fillRecHits");
-  fillCaloTowers_ = iConfig.getParameter<bool>("fillCaloTowers");
-  fillTracks_     = iConfig.getParameter<bool>("fillTracks");
-  refillRefVectors_ = iConfig.getParameter<bool>("refillRefVectors");
+  fillDigis_         = iConfig.getParameter<bool>("fillDigis");
+  fillRecHits_       = iConfig.getParameter<bool>("fillRecHits");
+  fillCaloTowers_    = iConfig.getParameter<bool>("fillCaloTowers");
+  fillTracks_        = iConfig.getParameter<bool>("fillTracks");
 
-  RBXEnergyThreshold_ = iConfig.getParameter<double>("RBXEnergyThreshold");
-  minRecHitEnergy_ = iConfig.getParameter<double>("minRecHitEnergy");
-  maxProblemRBXs_  = iConfig.getParameter<int>("maxProblemRBXs");
-  writeAllRBXs_       = iConfig.getParameter<bool>("writeAllRBXs");
+  maxProblemRBXs_    = iConfig.getParameter<int>("maxProblemRBXs");
 
-  maxCaloTowerIEta_   = iConfig.getParameter<int>("maxCaloTowerIEta");
-  maxTrackEta_        = iConfig.getParameter<double>("maxTrackEta");
-  minTrackPt_         = iConfig.getParameter<double>("minTrackPt");
+  maxCaloTowerIEta_  = iConfig.getParameter<int>("maxCaloTowerIEta");
+  maxTrackEta_       = iConfig.getParameter<double>("maxTrackEta");
+  minTrackPt_        = iConfig.getParameter<double>("minTrackPt");
 
   digiCollName_      = iConfig.getParameter<std::string>("digiCollName");
   recHitCollName_    = iConfig.getParameter<std::string>("recHitCollName");
   caloTowerCollName_ = iConfig.getParameter<std::string>("caloTowerCollName");
   trackCollName_     = iConfig.getParameter<std::string>("trackCollName");
-  hcalNoiseRBXCollName_ = iConfig.getParameter<std::string>("hcalNoiseRBXCollName");
+
+  minRecHitE_        = iConfig.getParameter<double>("minRecHitE");
+  minLowHitE_        = iConfig.getParameter<double>("minLowHitE");
+  minHighHitE_       = iConfig.getParameter<double>("minHighHitE");
 
   // if digis are filled, then rechits must also be filled
   if(fillDigis_ && !fillRecHits_) {
@@ -86,100 +85,53 @@ HcalNoiseInfoProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
   HcalNoiseRBXArray rbxarray;
   HcalNoiseSummary &summary=*result2;
 
+  // fill them with the various components
+  // digi assumes that rechit information is available
+  if(fillRecHits_)    fillrechits(iEvent, iSetup, rbxarray);
+  if(fillDigis_)      filldigis(iEvent, iSetup, rbxarray);
+  if(fillCaloTowers_) fillcalotwrs(iEvent, iSetup, rbxarray, summary);
+  if(fillTracks_)     filltracks(iEvent, iSetup, summary);
 
-  // we're creating HcalNoiseRBXs for the first time
-  if(!refillRefVectors_) {
+  // select those RBXs which are interesting
+  // also look for the highest energy RBX
+  HcalNoiseRBXArray::iterator maxit=rbxarray.begin();
+  double maxenergy=-999;
+  bool maxwritten=false;
+  for(HcalNoiseRBXArray::iterator rit = rbxarray.begin(); rit!=rbxarray.end(); ++rit) {
+    HcalNoiseRBX &rbx=(*rit);
+    CommonHcalNoiseRBXData data(rbx, minRecHitE_, minLowHitE_, minHighHitE_);
 
-    // fill them with the various components
-    // digi assumes that rechit information is available
-    if(fillRecHits_)    fillrechits(iEvent, iSetup, rbxarray);
-    if(fillDigis_)      filldigis(iEvent, iSetup, rbxarray);
-    if(fillCaloTowers_) fillcalotwrs(iEvent, iSetup, rbxarray, summary);
-    if(fillTracks_)     filltracks(iEvent, iSetup, summary);
-
-    // select those RBXs which are interesting
-    // also look for the highest energy RBX
-    HcalNoiseRBXArray::iterator maxit=rbxarray.begin();
-    double maxenergy=maxit->caloTowerHadE();
-    bool maxwritten=false;
-    for(HcalNoiseRBXArray::iterator rit = rbxarray.begin(); rit!=rbxarray.end(); ++rit) {
-      HcalNoiseRBX &rbx=(*rit);
-
-      // require that the RBX have a minimum energy
-      double rbxenergy=rit->caloTowerHadE();
-      if(rbxenergy<RBXEnergyThreshold_) continue;
-
-      // find the highest energy rbx
-      if(rbxenergy>maxenergy) {
-	maxenergy=rbxenergy;
-	maxit=rit;
-	maxwritten=false;
-      }
-
-      // find out if the rbx is problematic/noisy/interesting
-      bool problem=isProblematicRBX(rbx) || writeAllRBXs_;
-
-      // fill variables in the summary object not filled elsewhere
-      fillOtherSummaryVariables(summary, rbx);
-
-      // if the rbx is problematic write it
-      if(problem) {
-	summary.nproblemRBXs_++;
-	if(summary.nproblemRBXs_<=maxProblemRBXs_ || writeAllRBXs_) {
-	  result1->push_back(rbx);
-	  if(maxit==rit) maxwritten=true;
-	}
-      }
-    } // end loop over rbxs
-
-    // if we still haven't written the maximum energy rbx, write it now
-    if(!maxwritten) {
-      HcalNoiseRBX &rbx=(*maxit);
-      
-      // add the RBX to the event
-      result1->push_back(rbx);
-    }
-  
-    
-  } else {
-    // we're taking HcalNoiseRBXs that are already present, and creating a new set with RefVector information stored
-
-    // fill them with the various components
-    if(fillRecHits_)    fillrechits(iEvent, iSetup, rbxarray);
-    if(fillCaloTowers_) fillcalotwrs(iEvent, iSetup, rbxarray, summary);
-    if(fillTracks_)     filltracks(iEvent, iSetup, summary);
-
-    // get the old HcalNoiseRBX's
-    edm::Handle<HcalNoiseRBXCollection> handle;
-    iEvent.getByLabel(hcalNoiseRBXCollName_, handle);
-    if(!handle.isValid()) {
-      throw edm::Exception(edm::errors::ProductNotFound) << " could not find HcalNoiseRBXCollection named " << hcalNoiseRBXCollName_ << "\n.";
-      return;
+    // find the highest energy rbx
+    if(data.energy()>maxenergy) {
+      maxenergy=data.energy();
+      maxit=rit;
+      maxwritten=false;
     }
     
-    // loop over the old HcalNoiseRBX's and match them to the recently filled RBXs
-    for(HcalNoiseRBXCollection::const_iterator rit=handle->begin(); rit!=handle->end(); ++rit) {
-      const HcalNoiseRBX &oldrbx=(*rit);
-      HcalNoiseRBX &newrbx=rbxarray[oldrbx.idnumber()];
+    // find out if the rbx is problematic/noisy/etc.
+    bool writerbx = algo_.isProblematic(data) || !algo_.passLooseNoiseFilter(data) ||
+      !algo_.passTightNoiseFilter(data) || !algo_.passHighLevelNoiseFilter(data);
+    
+    // fill variables in the summary object not filled elsewhere
+    fillOtherSummaryVariables(summary, data);
 
-      // copy over the Digi-level Information
-      newrbx.allCharge_ = oldrbx.allCharge_;
-      std::vector<HcalNoiseHPD>::iterator hit1 = newrbx.hpds_.begin();
-      std::vector<HcalNoiseHPD>::const_iterator hit2 = oldrbx.hpds_.begin(); 
-      for( ; hit1 != newrbx.hpds_.end() && hit2 != oldrbx.hpds_.end(); ++hit1, ++hit2) {
-	hit1->totalZeros_ = hit2->totalZeros_;
-	hit1->maxZeros_ = hit2->maxZeros_;
-	hit1->bigCharge_ = hit2->bigCharge_;
-	hit1->big5Charge_ = hit2->big5Charge_;
+    if(writerbx) {
+      summary.nproblemRBXs_++;
+      if(summary.nproblemRBXs_<=maxProblemRBXs_) {
+	result1->push_back(rbx);
+	if(maxit==rit) maxwritten=true;
       }
-
-      // fill variables in the summary object not filled elsewhere
-      fillOtherSummaryVariables(summary, newrbx);
-
-      result1->push_back(newrbx);
     }
+  } // end loop over rbxs
+
+  // if we still haven't written the maximum energy rbx, write it now
+  if(!maxwritten) {
+    HcalNoiseRBX &rbx=(*maxit);
+    
+    // add the RBX to the event
+    result1->push_back(rbx);
   }
-
+  
   // put the rbxcollection and summary into the EDM
   iEvent.put(result1);
   iEvent.put(result2);
@@ -217,98 +169,88 @@ HcalNoiseInfoProducer::endRun(edm::Run&, const edm::EventSetup&)
   return;
 }
 
-// ------------ returns whether the rbx is problematic
-bool
-HcalNoiseInfoProducer::isProblematicRBX(const HcalNoiseRBX& rbx) const
-{
-  double allcharge2ts = rbx.allChargeHighest2TS();
-  double allchargetotal = rbx.allChargeTotal();
-  double allratio = allchargetotal==0 ? 999 : allcharge2ts/allchargetotal;
-  double energy = rbx.recHitEnergy(minRecHitEnergy_);
-
-  if(energy>200.) return true;
-  if((allratio<0.7 || allratio>0.9) && energy>25.) return true;
-  if(rbx.numRecHits(minRecHitEnergy_) >=17) return true;
-  if(rbx.totalZeros()>=4) return true;
-  if(fabs(rbx.minRecHitTime(20.0))>4.0) return true;
-  if(rbx.caloTowerEmFraction()<0.01 && energy>25.) return true;
-  return false;
-}
-
-
 // ------------ here we fill specific variables in the summary object not already accounted for earlier
 void 
-HcalNoiseInfoProducer::fillOtherSummaryVariables(HcalNoiseSummary& summary, const HcalNoiseRBX& rbx) const
+HcalNoiseInfoProducer::fillOtherSummaryVariables(HcalNoiseSummary& summary, const CommonHcalNoiseRBXData& data) const
 {
-  double rbxenergy = rbx.caloTowerHadE();
-
-  // E2TS/E10TS for the RBX
-  double allcharge2ts = rbx.allChargeHighest2TS();
-  double allchargetotal = rbx.allChargeTotal();
-  double allratio = allchargetotal==0 ? 999 : allcharge2ts/allchargetotal;
-  if(rbxenergy>50.0 && allratio<summary.minE2Over10TS()) {
-    summary.mine2ts_=allcharge2ts;
-    summary.mine10ts_=allchargetotal;
-  }
-
-  // # of zeros in RBX
-  int maxzeros=rbx.totalZeros();
-  if(maxzeros>summary.maxZeros()) {
-    summary.maxzeros_=maxzeros;
-  }
-
-  // # of RBX hits
-  int nrbxhits=rbx.numRecHits(minRecHitEnergy_);
-  if(nrbxhits>summary.maxRBXHits()) summary.maxrbxhits_=nrbxhits;
-  
-  // RBX EMF
-  float rbxemf=rbx.caloTowerEmFraction();
-  if(rbxenergy>50.0 && rbxemf<summary.minRBXEMF()) summary.minrbxemf_=rbxemf;
-
-  // # of HPD hits, HPD EMF, and timing: done together for speed
-  // loop over the HPDs in the RBX
-  for(std::vector<HcalNoiseHPD>::const_iterator it1=rbx.hpds_.begin(); it1!=rbx.hpds_.end(); ++it1) {
-    int nhits=it1->numRecHits(minRecHitEnergy_);
-    double emf=it1->caloTowerEmFraction();
-    double ene=it1->caloTowerHadE();
-    if(nhits>summary.maxHPDHits()) summary.maxhpdhits_=nhits;
-    if(ene>50. && emf<summary.minHPDEMF()) summary.minhpdemf_=emf;
-    
-    // loop over the hits in the HPD
-    for(edm::RefVector<HBHERecHitCollection>::const_iterator it2=it1->rechits_.begin(); it2!=it1->rechits_.end(); ++it2) {
-      float energy=(*it2)->energy();
-      float time=(*it2)->time();
-      if(energy>=10.) {
-	if(time<summary.min10GeVHitTime()) summary.min10_=time;
-	if(time>summary.max10GeVHitTime()) summary.max10_=time;
-	summary.rms10_ += time*time;
-	summary.cnthit10_++;
-      }
-      if(energy>=25.) {
-	if(time<summary.min25GeVHitTime()) summary.min25_=time;
-	if(time>summary.max25GeVHitTime()) summary.max25_=time;
-	summary.rms25_ += time*time;
-	summary.cnthit25_++;
-      }
+  // charge ratio
+  if(algo_.passRatioThreshold(data) && data.validRatio()) {
+    if(data.ratio()<summary.minE2Over10TS()) {
+      summary.mine2ts_ = data.e2ts();
+      summary.mine10ts_ = data.e10ts();    }
+    if(data.ratio()>summary.maxE2Over10TS()) {
+      summary.maxe2ts_ = data.e2ts();
+      summary.maxe10ts_ = data.e10ts();
     }
   }
 
-  // loose cuts
-  if(summary.minE2Over10TS()<0.7)   summary.filterstatus_ |= 0x1;
-  if(summary.min25GeVHitTime()<-7.) summary.filterstatus_ |= 0x2;
-  if(summary.max25GeVHitTime()>6.)  summary.filterstatus_ |= 0x4;
-  if(summary.maxZeros()>8)          summary.filterstatus_ |= 0x8;
-  if(summary.maxHPDHits()>16)       summary.filterstatus_ |= 0x10;
+  // ADC zeros
+  if(algo_.passZerosThreshold(data)) {
+    if(data.numZeros()>summary.maxZeros()) {
+      summary.maxzeros_ = data.numZeros();
+    }
+  }
 
-  // tight cuts
-  if(summary.minE2Over10TS()<0.75)  summary.filterstatus_ |= 0x100;
-  if(summary.min25GeVHitTime()<-5.) summary.filterstatus_ |= 0x200;
-  if(summary.max25GeVHitTime()>4.)  summary.filterstatus_ |= 0x400;
-  if(summary.maxZeros()>7)          summary.filterstatus_ |= 0x800;
-  if(summary.maxHPDHits()>15)       summary.filterstatus_ |= 0x1000;
+  // hits count
+  if(data.numHPDHits() > summary.maxHPDHits()) {
+    summary.maxhpdhits_ = data.numHPDHits();
+  }
+  if(data.numRBXHits() > summary.maxRBXHits()) {
+    summary.maxrbxhits_ = data.numRBXHits();
+  }
+  if(data.numHPDNoOtherHits() > summary.maxHPDNoOtherHits()) {
+    summary.maxhpdhitsnoother_ = data.numHPDNoOtherHits();
+  }
 
-  // high level cuts
-  if(summary.minRBXEMF()<0.01)      summary.filterstatus_ |= 0x20000;
+  // hit timing
+  if(data.minLowEHitTime()<summary.min10GeVHitTime()) {
+    summary.min10_ = data.minLowEHitTime();
+  }
+  if(data.maxLowEHitTime()>summary.max10GeVHitTime()) {
+    summary.max10_ = data.maxLowEHitTime();
+  }
+  summary.rms10_ += data.lowEHitTimeSqrd();
+  summary.cnthit10_ += data.numLowEHits();
+  if(data.minHighEHitTime()<summary.min25GeVHitTime()) {
+    summary.min25_ = data.minHighEHitTime();
+  }
+  if(data.maxHighEHitTime()>summary.max25GeVHitTime()) {
+    summary.max25_ = data.maxHighEHitTime();
+  }
+  summary.rms25_ += data.highEHitTimeSqrd();
+  summary.cnthit25_ += data.numHighEHits();
+
+  // EMF
+  if(algo_.passEMFThreshold(data)) {
+    if(summary.minHPDEMF() > data.HPDEMF()) {
+      summary.minhpdemf_ = data.HPDEMF();
+    }
+    if(summary.minRBXEMF() > data.RBXEMF()) {
+      summary.minrbxemf_ = data.RBXEMF();
+    }
+  }
+
+  // summary flag
+  if(!algo_.passLooseRatio(data))  summary.filterstatus_ |= 0x1;
+  if(!algo_.passLooseHits(data))   summary.filterstatus_ |= 0x2;
+  if(!algo_.passLooseZeros(data))  summary.filterstatus_ |= 0x4;
+  if(!algo_.passLooseTiming(data)) summary.filterstatus_ |= 0x8;
+
+  if(!algo_.passTightRatio(data))  summary.filterstatus_ |= 0x100;
+  if(!algo_.passTightHits(data))   summary.filterstatus_ |= 0x200;
+  if(!algo_.passTightZeros(data))  summary.filterstatus_ |= 0x400;
+  if(!algo_.passTightTiming(data)) summary.filterstatus_ |= 0x800;
+
+  if(!algo_.passHighLevelNoiseFilter(data)) summary.filterstatus_ |= 0x10000;
+
+  // summary refvectors
+  JoinCaloTowerRefVectorsWithoutDuplicates join;
+  if(!algo_.passLooseNoiseFilter(data))
+    join(summary.loosenoisetwrs_, data.rbxTowers());
+  if(!algo_.passTightNoiseFilter(data))
+    join(summary.tightnoisetwrs_, data.rbxTowers());
+  if(!algo_.passHighLevelNoiseFilter(data))
+    join(summary.hlnoisetwrs_, data.rbxTowers());
 
   return;
 }
@@ -367,7 +309,7 @@ HcalNoiseInfoProducer::filldigis(edm::Event& iEvent, const edm::EventSetup& iSet
       if((*rit)->id() == digi.id()) {
 	if(counter==0) isBig=isBig5=true;  // digi is also the highest energy rechit
 	if(counter<5) isBig5=true;         // digi is one of 5 highest energy rechits
-	isRBX=true;                        // digi has rechit energy>minRecHitEnergy_ GeV
+	isRBX=true;
       }
     }
 
@@ -416,12 +358,6 @@ HcalNoiseInfoProducer::fillrechits(edm::Event& iEvent, const edm::EventSetup& iS
   // loop over all of the rechit information
   for(HBHERecHitCollection::const_iterator it=handle->begin(); it!=handle->end(); ++it) {
     const HBHERecHit &rechit=(*it);
-
-    // calculate energy, time
-    float energy=rechit.energy();
-
-    // if the energy is too low, we skip it
-    if(energy<minRecHitEnergy_) continue;
 
     // find the hpd that the rechit is in
     HcalNoiseHPD& hpd=(*array.findHPD(rechit));
