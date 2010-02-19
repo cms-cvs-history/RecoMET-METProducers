@@ -260,14 +260,13 @@ HcalNoiseInfoProducer::fillOtherSummaryVariables(HcalNoiseSummary& summary, cons
 void
 HcalNoiseInfoProducer::filldigis(edm::Event& iEvent, const edm::EventSetup& iSetup, HcalNoiseRBXArray& array) const
 {
-
   // get the conditions and channel quality
   edm::ESHandle<HcalDbService> conditions;
   iSetup.get<HcalDbRecord>().get(conditions);
   const HcalQIEShape* shape = conditions->getHcalShape();
   edm::ESHandle<HcalChannelQuality> qualhandle;
   iSetup.get<HcalChannelQualityRcd>().get(qualhandle);
-  const HcalChannelQuality* myqual = qualhandle.product();
+  HcalChannelQuality* myqual = new HcalChannelQuality(*qualhandle.product());
   edm::ESHandle<HcalSeverityLevelComputer> mycomputer;
   iSetup.get<HcalSeverityLevelComputerRcd>().get(mycomputer);
   const HcalSeverityLevelComputer* mySeverity = mycomputer.product();
@@ -340,6 +339,7 @@ HcalNoiseInfoProducer::filldigis(edm::Event& iEvent, const edm::EventSetup& iSet
       hpd.maxZeros_=totalzeros;
   }
 
+  delete myqual;
   return;
 }
 
