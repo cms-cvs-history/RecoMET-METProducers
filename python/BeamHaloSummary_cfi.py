@@ -5,7 +5,10 @@ import FWCore.ParameterSet.Config as cms
 # Date: Oct. 15, 2009
 
 BeamHaloSummary = cms.EDProducer("BeamHaloSummaryProducer",
-                                 CSCHaloDataLabel = cms.InputTag("CSCHaloData"),
+                                 #CSCHaloDataLabel = cms.InputTag("CSCHaloData"),
+                                 CSCHaloDataLabels = cms.VInputTag( cms.InputTag("CSCHaloData"),
+                                                                    cms.InputTag("CSCHaloDataReRECO")
+                                                                    ),
                                  EcalHaloDataLabel = cms.InputTag("EcalHaloData"),
                                  HcalHaloDataLabel = cms.InputTag("HcalHaloData"),
                                  GlobalHaloDataLabel = cms.InputTag("GlobalHaloData"),
