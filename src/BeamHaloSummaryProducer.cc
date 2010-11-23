@@ -13,7 +13,8 @@ using namespace reco;
 
 BeamHaloSummaryProducer::BeamHaloSummaryProducer(const edm::ParameterSet& iConfig)
 {
-  IT_CSCHaloData = iConfig.getParameter<edm::InputTag>("CSCHaloDataLabel");
+  //IT_CSCHaloData = iConfig.getParameter<edm::InputTag>("CSCHaloDataLabel");
+  vIT_CSCHaloData = iConfig.getParameter< std::vector<edm::InputTag> >("CSCHaloDataLabels");
   IT_EcalHaloData = iConfig.getParameter<edm::InputTag>("EcalHaloDataLabel");
   IT_HcalHaloData = iConfig.getParameter<edm::InputTag>("HcalHaloDataLabel");
   IT_GlobalHaloData = iConfig.getParameter<edm::InputTag>("GlobalHaloDataLabel");
@@ -54,19 +55,32 @@ void BeamHaloSummaryProducer::produce(Event& iEvent, const EventSetup& iSetup)
   // BeamHaloSummary object 
   std::auto_ptr<BeamHaloSummary> TheBeamHaloSummary( new BeamHaloSummary() );
 
-  // CSC Specific Halo Data
-  Handle<CSCHaloData> TheCSCHaloData;
-  iEvent.getByLabel(IT_CSCHaloData, TheCSCHaloData);
+  bool CSCRecoLevel=false;
+  bool CSCDigiLevel=false;
+  bool CSCTriggerLevel=false;
+  for(unsigned int i = 0 ; i < vIT_CSCHaloData.size(); i++ ) 
+    {
+      // CSC Specific Halo Data
+      Handle<CSCHaloData> TheCSCHaloData;
+      iEvent.getByLabel(vIT_CSCHaloData[i], TheCSCHaloData);
 
-  const CSCHaloData CSCData = (*TheCSCHaloData.product() );
+      const CSCHaloData CSCData = (*TheCSCHaloData.product() );
+      
+      if( CSCData.NumberOfHaloTriggers() ) 
+	CSCTriggerLevel = true;
+      if( CSCData.NumberOfOutOfTimeTriggers() )
+	CSCDigiLevel = true;
+      if( CSCData.NumberOfHaloTracks() )
+	CSCRecoLevel = true;
+    }
   //Loose Id (any one of the three criteria)
-  if( CSCData.NumberOfHaloTriggers() || CSCData.NumberOfHaloTracks() || CSCData.NumberOfOutOfTimeTriggers() )
+  if( CSCTriggerLevel || CSCDigiLevel || CSCRecoLevel ) 
     TheBeamHaloSummary->GetCSCHaloReport()[0] = 1;
 
   //Tight Id (any two of the previous three criteria)
-  if( (CSCData.NumberOfHaloTriggers() && CSCData.NumberOfHaloTracks()) ||
-      (CSCData.NumberOfHaloTriggers() && CSCData.NumberOfOutOfTimeTriggers()) ||
-      (CSCData.NumberOfHaloTracks() && CSCData.NumberOfOutOfTimeTriggers() ) )
+  if( (CSCTriggerLevel && CSCDigiLevel ) ||
+      (CSCTriggerLevel && CSCRecoLevel ) ||
+      (CSCDigiLevel && CSCRecoLevel ) )
     TheBeamHaloSummary->GetCSCHaloReport()[1] = 1;
   
   //Ecal Specific Halo Data

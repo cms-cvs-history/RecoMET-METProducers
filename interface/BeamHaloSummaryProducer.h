@@ -69,7 +69,7 @@ namespace reco
     virtual void beginRun(edm::Run&, const edm::EventSetup&);
     virtual void endRun(edm::Run&, const edm::EventSetup&);
     
-    edm::InputTag IT_CSCHaloData;
+    std::vector<edm::InputTag> vIT_CSCHaloData;
     edm::InputTag IT_EcalHaloData;
     edm::InputTag IT_HcalHaloData;
     edm::InputTag IT_GlobalHaloData;
