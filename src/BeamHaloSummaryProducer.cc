@@ -13,7 +13,8 @@ using namespace reco;
 
 BeamHaloSummaryProducer::BeamHaloSummaryProducer(const edm::ParameterSet& iConfig)
 {
-  IT_CSCHaloData = iConfig.getParameter<edm::InputTag>("CSCHaloDataLabel");
+  //IT_CSCHaloData = iConfig.getParameter<edm::InputTag>("CSCHaloDataLabel");
+  vIT_CSCHaloData = iConfig.getParameter< std::vector<edm::InputTag> >("CSCHaloDataLabels");
   IT_EcalHaloData = iConfig.getParameter<edm::InputTag>("EcalHaloDataLabel");
   IT_HcalHaloData = iConfig.getParameter<edm::InputTag>("HcalHaloDataLabel");
   IT_GlobalHaloData = iConfig.getParameter<edm::InputTag>("GlobalHaloDataLabel");
@@ -54,19 +55,32 @@ void BeamHaloSummaryProducer::produce(Event& iEvent, const EventSetup& iSetup)
   // BeamHaloSummary object 
   std::auto_ptr<BeamHaloSummary> TheBeamHaloSummary( new BeamHaloSummary() );
 
-  // CSC Specific Halo Data
-  Handle<CSCHaloData> TheCSCHaloData;
-  iEvent.getByLabel(IT_CSCHaloData, TheCSCHaloData);
+  bool CSCRecoLevel=false;
+  bool CSCDigiLevel=false;
+  bool CSCTriggerLevel=false;
+  for(unsigned int i = 0 ; i < vIT_CSCHaloData.size(); i++ ) 
+    {
+      // CSC Specific Halo Data
+      Handle<CSCHaloData> TheCSCHaloData;
+      iEvent.getByLabel(vIT_CSCHaloData[i], TheCSCHaloData);
 
-  const CSCHaloData CSCData = (*TheCSCHaloData.product() );
+      const CSCHaloData CSCData = (*TheCSCHaloData.product() );
+      
+      if( CSCData.NumberOfHaloTriggers() ) 
+	CSCTriggerLevel = true;
+      if( CSCData.NumberOfOutOfTimeTriggers() )
+	CSCDigiLevel = true;
+      if( CSCData.NumberOfHaloTracks() )
+	CSCRecoLevel = true;
+    }
   //Loose Id (any one of the three criteria)
-  if( CSCData.NumberOfHaloTriggers() || CSCData.NumberOfHaloTracks() || CSCData.NumberOfOutOfTimeTriggers() )
+  if( CSCTriggerLevel || CSCDigiLevel || CSCRecoLevel ) 
     TheBeamHaloSummary->GetCSCHaloReport()[0] = 1;
 
   //Tight Id (any two of the previous three criteria)
-  if( (CSCData.NumberOfHaloTriggers() && CSCData.NumberOfHaloTracks()) ||
-      (CSCData.NumberOfHaloTriggers() && CSCData.NumberOfOutOfTimeTriggers()) ||
-      (CSCData.NumberOfHaloTracks() && CSCData.NumberOfOutOfTimeTriggers() ) )
+  if( (CSCTriggerLevel && CSCDigiLevel ) ||
+      (CSCTriggerLevel && CSCRecoLevel ) ||
+      (CSCDigiLevel && CSCRecoLevel ) )
     TheBeamHaloSummary->GetCSCHaloReport()[1] = 1;
   
   //Ecal Specific Halo Data
@@ -83,7 +97,7 @@ void BeamHaloSummaryProducer::produce(Event& iEvent, const EventSetup& iSetup)
       bool EcaliPhi = false;
       
       //Loose Id
-      if(iWedge-> Energy() > L_EcalPhiWedgeEnergy && iWedge->NumberOfConstituents() > L_EcalPhiWedgeConstituents && abs(iWedge->ZDirectionConfidence()) > L_EcalPhiWedgeConfidence)
+      if(iWedge-> Energy() > L_EcalPhiWedgeEnergy && iWedge->NumberOfConstituents() > L_EcalPhiWedgeConstituents && std::abs(iWedge->ZDirectionConfidence()) > L_EcalPhiWedgeConfidence)
 	{
 	  EcalLooseId = true;
 	  EcaliPhi = true;
@@ -153,14 +167,14 @@ void BeamHaloSummaryProducer::produce(Event& iEvent, const EventSetup& iSetup)
     {
       bool HcaliPhi = false;
       //Loose Id
-      if( iWedge-> Energy() > L_HcalPhiWedgeEnergy  && iWedge->NumberOfConstituents() > L_HcalPhiWedgeConstituents && abs(iWedge->ZDirectionConfidence()) > L_HcalPhiWedgeConfidence)
+      if( iWedge-> Energy() > L_HcalPhiWedgeEnergy  && iWedge->NumberOfConstituents() > L_HcalPhiWedgeConstituents && std::abs(iWedge->ZDirectionConfidence()) > L_HcalPhiWedgeConfidence)
         {
           HcalLooseId = true;
           HcaliPhi = true;
         }
 
       //Tight Id
-      if( iWedge-> Energy() > T_HcalPhiWedgeEnergy  && iWedge->NumberOfConstituents() > T_HcalPhiWedgeConstituents && abs(iWedge->ZDirectionConfidence()) > T_HcalPhiWedgeConfidence)
+      if( iWedge-> Energy() > T_HcalPhiWedgeEnergy  && iWedge->NumberOfConstituents() > T_HcalPhiWedgeConstituents && std::abs(iWedge->ZDirectionConfidence()) > T_HcalPhiWedgeConfidence)
         {
           HcalTightId = true;
           HcaliPhi = true;
@@ -201,7 +215,7 @@ void BeamHaloSummaryProducer::produce(Event& iEvent, const EventSetup& iSetup)
     {
       if( iWedge->NumberOfConstituents() > T_EcalPhiWedgeConstituents )
         GlobalTightId = true;
-      if( abs(iWedge->ZDirectionConfidence() > T_EcalPhiWedgeConfidence) )
+      if( std::abs(iWedge->ZDirectionConfidence() > T_EcalPhiWedgeConfidence) )
 	GlobalTightId = true;
     }
 
@@ -209,7 +223,7 @@ void BeamHaloSummaryProducer::produce(Event& iEvent, const EventSetup& iSetup)
     {
       if( iWedge->NumberOfConstituents() > T_HcalPhiWedgeConstituents )
         GlobalTightId = true;
-      if( abs(iWedge->ZDirectionConfidence()) > T_HcalPhiWedgeConfidence )
+      if( std::abs(iWedge->ZDirectionConfidence()) > T_HcalPhiWedgeConfidence )
 	GlobalTightId = true;
     }
 
