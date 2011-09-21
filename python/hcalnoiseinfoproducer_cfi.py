@@ -5,12 +5,12 @@ HcalNoiseParameterSet = cms.PSet(
     minRecHitE = cms.double(1.5),
     minLowHitE = cms.double(10.0),
     minHighHitE = cms.double(25.0),
-    
+
     # define energy threshold for "problematic" cuts
     pMinERatio = cms.double(25.0),
     pMinEZeros = cms.double(5.0),
     pMinEEMF = cms.double(10.0),
-    
+
     # define energy threshold for loose/tight/high level cuts
     minERatio = cms.double(50.0),
     minEZeros = cms.double(10.0),
@@ -32,8 +32,8 @@ HcalNoiseParameterSet = cms.PSet(
     pMaxRBXEMF = cms.double(0.02),
 
     # define loose noise cuts
-    lMinRatio = cms.double(0.70),
-    lMaxRatio = cms.double(0.96),
+    lMinRatio = cms.double(-999.),
+    lMaxRatio = cms.double(999.),
     lMinHPDHits = cms.int32(17),
     lMinRBXHits = cms.int32(999),
     lMinHPDNoOtherHits = cms.int32(10),
@@ -44,8 +44,8 @@ HcalNoiseParameterSet = cms.PSet(
     lMaxHighEHitTime = cms.double(9999.0),
 
     # define tight noise cuts
-    tMinRatio = cms.double(0.73),
-    tMaxRatio = cms.double(0.92),
+    tMinRatio = cms.double(-999.),
+    tMaxRatio = cms.double(999.),
     tMinHPDHits = cms.int32(16),
     tMinRBXHits = cms.int32(50),
     tMinHPDNoOtherHits = cms.int32(9),
@@ -57,7 +57,14 @@ HcalNoiseParameterSet = cms.PSet(
 
     # define high level noise cuts
     hlMaxHPDEMF = cms.double(-9999.0),
-    hlMaxRBXEMF = cms.double(0.01)
+    hlMaxRBXEMF = cms.double(0.01),
+
+    # RBX-wide TS4TS5 variable
+    TS4TS5EnergyThreshold = cms.double(50),
+    TS4TS5UpperThreshold = cms.vdouble(70, 90, 100, 400, 4000),
+    TS4TS5UpperCut = cms.vdouble(1, 0.8, 0.75, 0.72, 0.72),
+    TS4TS5LowerThreshold = cms.vdouble(100, 120, 150, 200, 300, 400, 500),
+    TS4TS5LowerCut = cms.vdouble(-1, -0.7, -0.4, -0.2, -0.08, 0, 0.1)
     )
 
 
@@ -91,4 +98,7 @@ hcalnoise = cms.EDProducer(
 
     # severity level
     HcalAcceptSeverityLevel = cms.uint32(9),
+
+    # which hcal calo flags to mask (HBHEIsolatedNoise=11, HBHEFlatNoise=12, HBHESpikeNoise=13, HBHETriangleNoise=14, HBHETS4TS5Noise=15)
+    HcalRecHitFlagsToBeExcluded = cms.vint32(11, 12, 13, 14, 15),
 )
